@@ -100,6 +100,9 @@ export default function Repository({ repo, index }: Props) {
     }
   };
 
+  console.log(repo);
+
+
   return (
     <div className="app-card" data-path={repo.path} key={repo.path || index}>
       <div className="app-info">
@@ -153,7 +156,7 @@ export default function Repository({ repo, index }: Props) {
             onClick={() => repo.remote && handleOpenRemote?.(repo.remote)}
             data-index={index}
           >
-            Ouvrir GitHub
+            Ouvrir le remote
           </button>
         ) : (
           <button

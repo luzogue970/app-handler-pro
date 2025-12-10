@@ -1,17 +1,25 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import type { Repo } from "../components/repository/repository";
 import type { Status } from "../components/github/github";
 import * as GitHubService from "../services/githubService";
+import * as GitLabService from "../services/gitlabService";
 
 export function useRepos() {
   const [allRepos, setAllRepos] = useState<Repo[]>([]);
   const [githubRepos, setGithubRepos] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [githubStatus, setGithubStatus] = useState<Status>({
     connected: false,
     loading: false,
   });
   const [deviceInfo, setDeviceInfo] = useState<any | null>(null);
+
+
+
+
+  const [gitlabRepos, setGitlabRepos] = useState<any[] | null>(null);
+  const [gitlabStatusChecked, setGitlabStatusChecked] = useState(false);
+  const [gitlabStatus, setGitlabStatus] = useState<any>({ connected: false });
 
   const normalizeUrl = (u?: string) =>
     (u || "").replace(/\.git$/, "").replace(/\/+$/, "").toLowerCase();
@@ -173,6 +181,65 @@ export function useRepos() {
   const localFiltered = allRepos.filter((r) => repoMatches(r));
   const remoteFiltered = githubRepos.filter((r) => repoMatches(r));
 
+  async function refreshGitlab() {
+    try {
+      const repos = await GitLabService.listRepos();
+      setGitlabRepos(Array.isArray(repos) ? repos : []);
+      return repos;
+    } catch (err) {
+      setGitlabRepos(null);
+      throw err;
+    }
+  }
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await GitLabService.getAuthStatus();
+        setGitlabStatusChecked(true);
+        if (s && s.connected) {
+          setGitlabStatus({ connected: !!s.connected, host: s.host ?? null, login: s.login ?? null, avatarUrl: s.avatarUrl ?? null });
+          try {
+            const repos = await GitLabService.listRepos();
+            setGitlabRepos(Array.isArray(repos) ? repos : []);
+          } catch {
+            setGitlabRepos(null);
+          }
+        } else {
+          setGitlabStatus({ connected: false });
+          setGitlabRepos(null);
+        }
+      } catch {
+        setGitlabStatusChecked(true);
+        setGitlabStatus({ connected: false });
+        setGitlabRepos(null);
+      }
+    })();
+  }, []);
+
+
+  function matchQuery(repo: any, q: string) {
+    if (!q) return true;
+    const t = q.trim().toLowerCase();
+    if (!t) return true;
+    const vals = [
+      repo.name,
+      repo.path,
+      repo.path_with_namespace,
+      repo.full_name,
+      repo.description,
+      repo.webUrl,
+      repo.web_url,
+    ];
+    return vals.some((v) => !!v && String(v).toLowerCase().includes(t));
+  }
+
+
+  const gitlabFiltered = useMemo(() => {
+    if (!gitlabRepos) return [];
+    return gitlabRepos.filter((r) => matchQuery(r, searchQuery));
+  }, [gitlabRepos, searchQuery]);
+
   return {
     allRepos,
     githubRepos,
@@ -188,5 +255,10 @@ export function useRepos() {
     onPopupSuccess,
     loadRepos,
     loadGithubRepos,
+    gitlabRepos,
+    gitlabFiltered,
+    gitlabStatus,
+    gitlabStatusChecked,
+    refreshGitlab,
   };
 }

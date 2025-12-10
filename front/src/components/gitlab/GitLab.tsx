@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import GitLabPopup from "./GitLabPopup";
+import GitLabPopup from "./gitlabpopup/GitLabPopup";
 import { getAuthStatus, listRepos, logout } from "../../services/gitlabService";
 import "./gitlab.css";
-import "./gitlabPopup.css";
 
 type Status = {
   connected: boolean;

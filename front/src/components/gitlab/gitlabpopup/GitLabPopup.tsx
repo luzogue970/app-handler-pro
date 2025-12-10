@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { loginWithToken } from "../../services/gitlabService";
+import { loginWithToken } from "../../../services/gitlabService";
 import "./gitlabPopup.css";
 
 type Props = {
