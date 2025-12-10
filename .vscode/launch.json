@@ -1,0 +1,47 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Electron (main)",
+            "type": "pwa-node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/electron",
+            "runtimeExecutable": "${workspaceFolder}/electron/node_modules/.bin/electron",
+            "runtimeArgs": [
+                ".",
+                "--remote-debugging-port=9222",
+                "--inspect=9229"
+            ],
+            "windows": {
+                "runtimeExecutable": "${workspaceFolder}/electron/node_modules/.bin/electron.cmd"
+            },
+            "outputCapture": "std",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "preLaunchTask": "start_front"
+        },
+        {
+            "name": "Attach to Renderer (Chromium)",
+            "type": "pwa-chrome",
+            "request": "attach",
+            "port": 9222,
+            "url": "http://localhost:5173/",
+            "webRoot": "${workspaceFolder}/front",
+            "timeout": 60000,
+            "sourceMapPathOverrides": {
+                "webpack:///*": "${webRoot}/*",
+                "/<anonymous>/*": "${webRoot}/*"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Electron: Main + Renderer",
+            "configurations": [
+                "Debug Electron (main)",
+                "Attach to Renderer (Chromium)"
+            ]
+        }
+    ]
+}

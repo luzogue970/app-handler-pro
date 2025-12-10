@@ -1,0 +1,33 @@
+/* github */
+.github-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 8px 16px;
+}
+
+#github-login-btn {
+  border-radius: 999px;
+  border: 1px solid #3b82f6;
+  background: #020617;
+  color: #e5e7eb;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#github-login-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  border-color: #4b5563;
+}
+
+#github-status {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: #ef4444;
+}

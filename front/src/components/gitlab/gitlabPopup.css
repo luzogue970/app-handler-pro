@@ -1,0 +1,63 @@
+.gitlab-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.5);
+  z-index: 9999;
+}
+
+.gitlab-popup {
+  background: #ffffff;
+  color: #0f172a;
+  padding: 18px;
+  border-radius: 10px;
+  width: 420px;
+  max-width: calc(100% - 32px);
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.2);
+}
+
+.gitlab-popup h3 {
+  margin: 0 0 8px 0;
+}
+
+.gitlab-popup form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: #374151;
+}
+
+.gitlab-popup input {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gitlab-popup button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.gitlab-popup button.secondary {
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.06);
+  color: #0f172a;
+}
+
+.gitlab-popup-status {
+  font-size: 13px;
+  margin-top: 8px;
+  color: #6b7280;
+}

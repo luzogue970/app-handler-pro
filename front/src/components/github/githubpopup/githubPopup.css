@@ -1,0 +1,93 @@
+.gh-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.6);
+  z-index: 9999;
+}
+.gh-popup {
+  background: #020617;
+  color: #e5e7eb;
+  padding: 18px;
+  border-radius: 10px;
+  width: 420px;
+  max-width: calc(100% - 32px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  border: 1px solid #1f2937;
+}
+.gh-popup h3 {
+  margin: 0 0 8px 0;
+}
+
+.gh-code-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.gh-code {
+  flex: 1 1 auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
+    monospace;
+  font-size: 22px;
+  letter-spacing: 2px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-align: center;
+  user-select: all;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* copy button */
+.gh-copy-btn {
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: #111827;
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 13px;
+}
+.gh-copy-btn:hover {
+  background: #1f2937;
+}
+.gh-copy-btn:active {
+  transform: translateY(0);
+}
+
+/* rest */
+.gh-tip {
+  font-size: 13px;
+  color: #9ca3af;
+}
+.gh-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+.gh-actions button {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: #111827;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+.gh-actions button.secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.gh-status {
+  margin-top: 8px;
+  font-size: 13px;
+  height: 20px;
+  color: #9ca3af;
+}

@@ -1,0 +1,17 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --bg: #0f172a;
+  --card: #020617;
+  --muted: #9ca3af;
+  --text: #e5e7eb;
+  --border: #1f2937;
+  --accent-green: #22c55e;
+  --accent-blue: #3b82f6;
+  --accent-red: #f63b3b;
+  --accent-duck: #048b9a;
+  --btn-bg: #111827;
+}

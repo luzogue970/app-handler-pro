@@ -1,0 +1,36 @@
+{
+  "name": "app-handler-pro",
+  "version": "2.0.0",
+  "description": "Améliorer l'interface utilisateur de `User Management` en utilisant un framework moderne.",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run start --prefix electron\" \"npm run dev --prefix front\""
+  },
+  "keywords": [],
+  "author": "",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "tasks": [
+    {
+      "label": "start_front",
+      "type": "shell",
+      "command": "npm run dev --prefix front",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": [],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "Local:.*://localhost:\\d+"
+        }
+      }
+    }
+  ]
+}
