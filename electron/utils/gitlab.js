@@ -49,11 +49,6 @@ export async function getAuthStatus() {
   };
 }
 
-/**
- * Login by Personal Access Token (works with gitlab.com and self-hosted GitLab)
- * host: e.g. "https://gitlab.com" or "https://gitlab.mycompany.com"
- * token: PAT or OAuth token
- */
 export async function loginWithToken(host = "https://gitlab.com", token) {
   if (!host || !token) throw new Error("host and token required");
   try {
@@ -84,10 +79,6 @@ export function logout() {
   return { connected: false, host: null, login: null, avatarUrl: null };
 }
 
-/**
- * List projects accessible to the user (membership=true)
- * supports pagination
- */
 export async function listUserRepos() {
   const stored = readStoredToken(tokenPath);
   if (!stored || !stored.token || !stored.host)
@@ -313,45 +304,64 @@ export async function pushLocalToRemote(
   opts = { createIfMissing: true }
 ) {
   if (!fs.existsSync(localPath)) throw new Error("local path does not exist");
-  if (opts.createIfMissing) await ensureInitialized(localPath);
+
+  if (opts.createIfMissing) {
+    // S'assure qu'il y a un repo git + un commit + une branche
+    await ensureInitialized(localPath, branch);
+  }
+
+  // Optionnel mais propre : récupérer la branche courante si possible
+  let currentBranch = branch;
+  const head = await execGit(localPath, ["rev-parse", "--abbrev-ref", "HEAD"]);
+  if (head.code === 0) {
+    const b = head.stdout.trim();
+    if (b && b !== "HEAD") currentBranch = b;
+  }
+
   const tmpRemote = `tmp-${Date.now()}`;
   await execGit(localPath, ["remote", "add", tmpRemote, remoteUrl]);
+
   const push = await execGit(localPath, [
     "push",
     tmpRemote,
-    branch,
+    `${currentBranch}:${branch}`, // local:remote
     "--set-upstream",
   ]);
+
   await execGit(localPath, ["remote", "remove", tmpRemote]);
-  if (push.code !== 0)
+
+  if (push.code !== 0) {
     return { success: false, error: push.stderr || push.stdout };
+  }
+
   return { success: true, stdout: push.stdout };
 }
 
-// utils/gitlab.js
-export async function createRemoteRepo(repo) {
-  const {
-    name,
-    description = "",
-    private: isPrivate = false,
-    namespaceId = null,
-  } = repo;
+
+export async function createRemoteRepo(opts = {}) {
+  let name;
+  let description = "";
+  let isPrivate = false;
+  console.log(JSON.stringify(opts));
+
+
+    name = opts.name.name ?? "";
+    description = opts.name.description ?? "";
+    isPrivate = opts.name.isPrivate ?? false;
 
   const stored = readStoredToken(tokenPath);
   if (!stored || !stored.token || !stored.host) {
     throw new Error("Not authenticated");
   }
 
-  const toto = "toto2";
   const body = {
-    toto,
+    name: name,
     description,
     visibility: isPrivate ? "private" : "public",
   };
 
-  if (namespaceId) body.namespace_id = namespaceId;
-
   const url = `${stored.host.replace(/\/*$/, "")}/api/v4/projects`;
+
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -361,6 +371,9 @@ export async function createRemoteRepo(repo) {
     body: JSON.stringify(body),
   });
 
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(typeof data === "string" ? data : JSON.stringify(data));
+  }
+  return data;
 }
