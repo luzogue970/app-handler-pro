@@ -17,7 +17,6 @@ export default function GitLab() {
     host: null,
     login: null,
   });
-  const [_, setRepos] = useState<any[] | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,9 +45,12 @@ export default function GitLab() {
       await logout();
     } catch {}
     setStatus({ connected: false, host: null, login: null });
-    setRepos(null);
+    window.dispatchEvent(
+      new CustomEvent("repos-updated", {
+        detail: { provider: "gitlab", connected: false },
+      })
+    );
   };
-
 
   const onPopupSuccess = async (res: any) => {
     setShowPopup(false);
@@ -58,12 +60,11 @@ export default function GitLab() {
       login: res.login ?? null,
       avatarUrl: res.avatarUrl ?? null,
     });
-    try {
-      const r = await listRepos();
-      setRepos(Array.isArray(r) ? r : []);
-    } catch {
-      setRepos(null);
-    }
+    window.dispatchEvent(
+      new CustomEvent("repos-updated", {
+        detail: { provider: "gitlab", connected: true },
+      })
+    );
   };
 
   return (
@@ -74,7 +75,7 @@ export default function GitLab() {
           className="github-login-btn"
           onClick={status.connected ? handleLogout : openLogin}
         >
-          Se connecter à GitLab
+          { !status.connected ? "Se connecter à GitLab" : "Se déconnecter de GitLab"}
         </button>
 
         <span id="gitlab-status" className="github-status">

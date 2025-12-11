@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import * as GitLabService from "../services/gitlabService";
 import { normalizeUrl } from "./utils";
 import type { Repo } from "../components/repository/repository";
@@ -133,6 +133,20 @@ export function useGitlabRepo(allReposRef: () => Repo[]) {
       setGitlabRepos(null);
     }
   }
+  useEffect(() => {
+    const handler = (ev: Event) => {
+      try {
+        const d = (ev as CustomEvent).detail;
+        if (!d || d.provider === "gitlab" || d.provider === undefined) {
+          loadGitlabRepos().catch((e) => console.debug("[useGitlabRepo] refresh failed:", e));
+        }
+      } catch (err) {
+        console.debug("[useGitlabRepo] repos-updated handler error:", err);
+      }
+    };
+    window.addEventListener("repos-updated", handler as EventListener);
+    return () => window.removeEventListener("repos-updated", handler as EventListener);
+  }, [loadGitlabRepos]);
 
   return {
     gitlabRepos,
