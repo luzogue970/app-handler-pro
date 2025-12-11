@@ -2,10 +2,6 @@ import { useCallback, useState } from "react";
 import type { Repo } from "../components/repository/repository";
 import { stringifyValues } from "./utils";
 
-/**
- * useLocalRepo
- * - expose allRepos, loadRepos, localFiltered (filter by searchQuery)
- */
 export function useLocalRepo() {
   const [allRepos, setAllRepos] = useState<Repo[]>([]);
 

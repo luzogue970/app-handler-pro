@@ -2,8 +2,8 @@ import Repository, { Repo } from "./repository/repository";
 
 type Props = {
   local: Repo[];
-  github: any[];
-  gitlab: any[];
+  github: Repo[];
+  gitlab: Repo[];
 };
 
 function normalizeKey(u?: string) {
@@ -86,7 +86,7 @@ export default function RepoList({ local, github: remote, gitlab }: Props) {
             github Remote only
           </h2>
           {filteredGithubRemote.map((r: any, i: number) => (
-            <Repository key={r.path || `remote-${i}`} repo={r} index={i} />
+            <Repository key={r.path || `remote-gh-${i}`} repo={r} index={i} />
           ))}
         </>
       )}
@@ -97,7 +97,7 @@ export default function RepoList({ local, github: remote, gitlab }: Props) {
             gitlab Remote only
           </h2>
           {filteredgitlabRemote.map((r: any, i: number) => (
-            <Repository key={r.path || `remote-${i}`} repo={r} index={i} />
+            <Repository key={r.path || `remote-gl-${i}`} repo={r} index={i} />
           ))}
         </>
       )}
