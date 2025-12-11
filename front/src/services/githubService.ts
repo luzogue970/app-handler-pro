@@ -29,4 +29,3 @@ export const pullProject = async (remote: string) => {
 export const pushLocalToRemote = async (localPath: string, remoteUrl: string, branch: string) => {
   return await window.github?.pushLocalToRemote({localPath, remoteUrl, branch});
 }
-

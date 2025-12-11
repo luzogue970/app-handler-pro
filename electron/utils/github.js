@@ -5,7 +5,7 @@ import { shell, dialog } from "electron";
 import { spawn } from "child_process";
 import { openInVSCode } from "./commands.js";
 
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "Ov23liZUPGu4OWZ9PPQN";
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "TODEFINEINENV";
 
 const TOKEN_DIR = path.join(os.homedir(), ".conf-saver");
 const TOKEN_PATH = path.join(TOKEN_DIR, "github-token.json");
@@ -132,7 +132,7 @@ async function pollForAccessToken(deviceCode, intervalSec, expiresInSec) {
 }
 
 export async function login() {
-  if (!GITHUB_CLIENT_ID || GITHUB_CLIENT_ID === "TON_CLIENT_ID_GITHUB") {
+  if (!GITHUB_CLIENT_ID || GITHUB_CLIENT_ID === "TODEFINEINENV") {
     throw new Error("GITHUB_CLIENT_ID non configuré");
   }
 
@@ -407,7 +407,7 @@ export async function pushLocalToRemote(opts = {}) {
   } else {
     ({ localPath, remoteUrl = "", branch } = opts || {});
   }
-  
+
   if (!localPath || !remoteUrl)
     throw new Error("localPath and remoteUrl required");
 

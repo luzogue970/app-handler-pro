@@ -74,6 +74,7 @@ export default function GitLab() {
           className="github-login-btn"
           onClick={status.connected ? handleLogout : openLogin}
         >
+          Se connecter à GitLab
         </button>
 
         <span id="gitlab-status" className="github-status">
