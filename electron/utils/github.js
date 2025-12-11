@@ -4,39 +4,16 @@ import os from "os";
 import { shell, dialog } from "electron";
 import { spawn } from "child_process";
 import { openInVSCode } from "./commands.js";
+import {
+  readStoredToken,
+  writeStoredToken,
+  clearStoredToken,
+} from "./gitProviderHelper.js";
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "TODEFINEINENV";
-
-const TOKEN_DIR = path.join(os.homedir(), ".conf-saver");
-const TOKEN_PATH = path.join(TOKEN_DIR, "github-token.json");
-
-function readStoredToken() {
-  try {
-    if (!fs.existsSync(TOKEN_PATH)) return null;
-    return JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
-  } catch {
-    return null;
-  }
-}
-
-function writeStoredToken(data) {
-  try {
-    if (!fs.existsSync(TOKEN_DIR)) {
-      fs.mkdirSync(TOKEN_DIR, { recursive: true });
-    }
-    fs.writeFileSync(TOKEN_PATH, JSON.stringify(data, null, 2), "utf8");
-  } catch (err) {
-    console.error("[GitHub] writeStoredToken error:", err);
-  }
-}
-
-function clearStoredToken() {
-  try {
-    if (fs.existsSync(TOKEN_PATH)) fs.unlinkSync(TOKEN_PATH);
-  } catch (err) {
-    console.error("[GitHub] clearStoredToken error:", err);
-  }
-}
+const providerName = "github";
+const token_dir = path.join(os.homedir(), ".conf-saver");
+const tokenPath = path.join(token_dir, providerName + "-token.json");
 
 function wait(ms) {
   return new Promise((res) => setTimeout(res, ms));
@@ -56,7 +33,7 @@ async function fetchGitHubUser(accessToken) {
 }
 
 export async function getAuthStatus() {
-  const stored = readStoredToken();
+  const stored = readStoredToken(tokenPath);
   if (!stored || !stored.access_token) {
     return {
       connected: false,
@@ -142,7 +119,6 @@ export async function login() {
     deviceInfo.verification_uri_complete || deviceInfo.verification_uri;
   shell.openExternal(urlToOpen);
 
-
   const tokenData = await pollForAccessToken(
     deviceInfo.device_code,
     deviceInfo.interval,
@@ -151,14 +127,17 @@ export async function login() {
 
   const user = await fetchGitHubUser(tokenData.access_token);
 
-  writeStoredToken({
-    access_token: tokenData.access_token,
-    token_type: tokenData.token_type,
-    scope: tokenData.scope,
-    login: user.login,
-    avatar_url: user.avatar_url,
-    id: user.id,
-  });
+  writeStoredToken(
+    {
+      access_token: tokenData.access_token,
+      token_type: tokenData.token_type,
+      scope: tokenData.scope,
+      login: user.login,
+      avatar_url: user.avatar_url,
+      id: user.id,
+    },
+    tokenPath
+  );
 
   return {
     connected: true,
@@ -168,7 +147,7 @@ export async function login() {
 }
 
 export async function logout() {
-  clearStoredToken();
+  clearStoredToken(tokenPath);
   return {
     connected: false,
     login: null,
@@ -177,7 +156,7 @@ export async function logout() {
 }
 
 export async function listUserRepos() {
-  const stored = readStoredToken();
+  const stored = readStoredToken(tokenPath);
   if (!stored || !stored.access_token) {
     throw new Error("Utilisateur non connecté à GitHub");
   }
@@ -235,14 +214,17 @@ export async function completeDeviceLogin(
   );
   const user = await fetchGitHubUser(tokenData.access_token);
 
-  writeStoredToken({
-    access_token: tokenData.access_token,
-    token_type: tokenData.token_type,
-    scope: tokenData.scope,
-    login: user.login,
-    avatar_url: user.avatar_url,
-    id: user.id,
-  });
+  writeStoredToken(
+    {
+      access_token: tokenData.access_token,
+      token_type: tokenData.token_type,
+      scope: tokenData.scope,
+      login: user.login,
+      avatar_url: user.avatar_url,
+      id: user.id,
+    },
+    tokenPath
+  );
 
   return {
     connected: true,
@@ -348,7 +330,7 @@ export async function createRemoteRepo(opts = {}) {
     org,
   });
 
-  const tokenData = readStoredToken();
+  const tokenData = readStoredToken(tokenPath);
   const token = tokenData?.access_token;
   if (!token) throw new Error("No GitHub token stored");
 

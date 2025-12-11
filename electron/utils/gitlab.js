@@ -3,35 +3,15 @@ import path from "path";
 import os from "os";
 import { shell, dialog } from "electron";
 import { spawn } from "child_process";
+import {
+  readStoredToken,
+  writeStoredToken,
+  clearStoredToken,
+} from "./gitProviderHelper.js";
 
-const TOKEN_DIR = path.join(os.homedir(), ".conf-saver");
-const TOKEN_PATH = path.join(TOKEN_DIR, "gitlab-token.json");
-
-function readStoredToken() {
-  try {
-    if (!fs.existsSync(TOKEN_PATH)) return null;
-    return JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
-  } catch {
-    return null;
-  }
-}
-
-function writeStoredToken(data) {
-  try {
-    if (!fs.existsSync(TOKEN_DIR)) fs.mkdirSync(TOKEN_DIR, { recursive: true });
-    fs.writeFileSync(TOKEN_PATH, JSON.stringify(data, null, 2), "utf8");
-  } catch (err) {
-    console.error("[GitLab] writeStoredToken error:", err);
-  }
-}
-
-function clearStoredToken() {
-  try {
-    if (fs.existsSync(TOKEN_PATH)) fs.unlinkSync(TOKEN_PATH);
-  } catch (err) {
-    console.error("[GitLab] clearStoredToken error:", err);
-  }
-}
+const providerName = "gitlab";
+const token_dir = path.join(os.homedir(), ".conf-saver");
+const tokenPath = path.join(token_dir, providerName + "-token.json");
 
 async function fetchGitLabUser(host, token) {
   const base = host.replace(/\/+$/, "");
@@ -57,7 +37,7 @@ async function fetchGitLabUser(host, token) {
 }
 
 export async function getAuthStatus() {
-  const stored = readStoredToken();
+  const stored = readStoredToken(tokenPath);
   if (!stored || !stored.token || !stored.host) {
     return { connected: false, host: null, login: null, avatarUrl: null };
   }
@@ -78,13 +58,16 @@ export async function loginWithToken(host = "https://gitlab.com", token) {
   if (!host || !token) throw new Error("host and token required");
   try {
     const user = await fetchGitLabUser(host, token);
-    writeStoredToken({
-      host,
-      token,
-      username: user.username || user.name || null,
-      id: user.id,
-      avatar_url: user.avatar_url || null,
-    });
+    writeStoredToken(
+      {
+        host,
+        token,
+        username: user.username || user.name || null,
+        id: user.id,
+        avatar_url: user.avatar_url || null,
+      },
+      tokenPath
+    );
     return {
       connected: true,
       host,
@@ -97,7 +80,7 @@ export async function loginWithToken(host = "https://gitlab.com", token) {
 }
 
 export function logout() {
-  clearStoredToken();
+  clearStoredToken(tokenPath);
   return { connected: false, host: null, login: null, avatarUrl: null };
 }
 
@@ -106,7 +89,7 @@ export function logout() {
  * supports pagination
  */
 export async function listUserRepos() {
-  const stored = readStoredToken();
+  const stored = readStoredToken(tokenPath);
   if (!stored || !stored.token || !stored.host)
     throw new Error("Utilisateur non connecté à GitLab");
 
@@ -168,7 +151,7 @@ export async function listUserRepos() {
 }
 
 export async function pullProject(remote) {
-  const stored = readStoredToken();
+  const stored = readStoredToken(tokenPath);
 
   if (!remote) throw new Error("remote required");
 
@@ -354,12 +337,12 @@ export async function createRemoteRepo(repo) {
     namespaceId = null,
   } = repo;
 
-  const stored = readStoredToken();
+  const stored = readStoredToken(tokenPath);
   if (!stored || !stored.token || !stored.host) {
     throw new Error("Not authenticated");
   }
 
-  const toto = "toto2"
+  const toto = "toto2";
   const body = {
     toto,
     description,
@@ -381,4 +364,3 @@ export async function createRemoteRepo(repo) {
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
-
