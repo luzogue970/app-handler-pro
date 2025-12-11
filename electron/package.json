@@ -12,9 +12,5 @@
   "type": "module",
   "devDependencies": {
     "electron": "^39.2.4"
-  },
-  "dependencies": {
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
   }
 }

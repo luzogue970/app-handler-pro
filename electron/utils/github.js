@@ -407,11 +407,7 @@ export async function pushLocalToRemote(opts = {}) {
   } else {
     ({ localPath, remoteUrl = "", branch } = opts || {});
   }
-
-  console.log(
-    "ici info pushLocaltoRemote github.js: " + localPath + " " + remoteUrl
-  );
-
+  
   if (!localPath || !remoteUrl)
     throw new Error("localPath and remoteUrl required");
 

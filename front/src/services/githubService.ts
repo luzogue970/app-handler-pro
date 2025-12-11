@@ -22,6 +22,10 @@ export const createRemoteRepo = async (name: string, description: string, priavt
   return await window.github?.createRemoteRepo({name, description, priavtee});
 }
 
+export const pullProject = async (remote: string) => {
+  return await window.github?.pullProject(remote);
+}
+
 export const pushLocalToRemote = async (localPath: string, remoteUrl: string, branch: string) => {
   return await window.github?.pushLocalToRemote({localPath, remoteUrl, branch});
 }

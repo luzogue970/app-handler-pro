@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import GitLabPopup from "./gitlabpopup/GitLabPopup";
 import { getAuthStatus, listRepos, logout } from "../../services/gitlabService";
 import "./gitlab.css";
@@ -17,8 +17,7 @@ export default function GitLab() {
     host: null,
     login: null,
   });
-  const [repos, setRepos] = useState<any[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [_, setRepos] = useState<any[] | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,19 +49,6 @@ export default function GitLab() {
     setRepos(null);
   };
 
-  const refreshList = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const r = await listRepos();
-      setRepos(Array.isArray(r) ? r : []);
-    } catch (err: any) {
-      setError(err?.message ?? String(err));
-      setRepos([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onPopupSuccess = async (res: any) => {
     setShowPopup(false);
@@ -87,13 +73,7 @@ export default function GitLab() {
           id="gitlab-login-btn"
           className="github-login-btn"
           onClick={status.connected ? handleLogout : openLogin}
-          disabled={loading}
         >
-          {loading
-            ? "Chargement..."
-            : status.connected
-            ? "Se déconnecter de GitLab"
-            : "Se connecter à GitLab"}
         </button>
 
         <span id="gitlab-status" className="github-status">

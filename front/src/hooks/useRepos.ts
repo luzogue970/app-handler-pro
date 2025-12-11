@@ -39,34 +39,13 @@ export function useRepos() {
 
   useEffect(() => {
     (async () => {
-      await local.loadRepos();
-
-
-      try {
-        github.setGithubStatus((s) => ({ ...s, loading: true }));
-        const status = await (await import("../services/githubService")).getAuthStatus();
-        if (status && status.connected) {
-          github.setGithubStatus({
-            connected: true,
-            loading: false,
-            login: status.login ?? null,
-            error: null,
-          });
-          await github.loadGithubRepos();
-        } else {
-          github.setGithubStatus({ connected: false, loading: false, login: null, error: null });
-        }
-      } catch (err) {
-        github.setGithubStatus({
-          connected: false,
-          loading: false,
-          login: null,
-          error: String(err ?? "Erreur"),
-        });
-      }
-
-
-      await gitlab.initGitlabStatusAndRepos();
+      console.debug("[useRepos] init sequence start");
+      const locals = await local.loadRepos();           // <-- charger d'abord les repos locaux
+      console.debug("[useRepos] after local.loadRepos - local.allRepos length:", local.allRepos.length, "returned:", Array.isArray(locals) ? locals.length : typeof locals);
+      await github.loadGithubRepos();
+      console.debug("[useRepos] after github.loadGithubRepos - github count:", github.githubRepos?.length ?? 0);
+      await gitlab.initGitlabStatusAndRepos(); // puis GitLab (qui s'appuie sur allReposRef)
+      console.debug("[useRepos] after gitlab.initGitlabStatusAndRepos - gitlab count:", gitlab.gitlabRepos?.length ?? 0);
     })();
 
   }, []);

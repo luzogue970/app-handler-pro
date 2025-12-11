@@ -15,7 +15,7 @@ function normalizeKey(u?: string) {
     .toLowerCase();
 }
 
-export default function RepoList({ local, github: remote, gitlab }: Props) {
+export default function RepoList({ local, github, gitlab }: Props) {
   const localKeys = new Set(
     local.map((r) => normalizeKey(r.remote ?? r.path ?? r.name)).filter(Boolean)
   );
@@ -33,7 +33,7 @@ export default function RepoList({ local, github: remote, gitlab }: Props) {
   //     "lastActivityAt": "2025-09-04T14:21:46.155Z"
   // }
 
-  const filteredGithubRemote = (remote || []).filter((r: any) => {
+  const filteredGithubRemote = (github || []).filter((r: any) => {
     const candidates = [
       r.remote,
       r.path,

@@ -32,4 +32,7 @@ contextBridge.exposeInMainWorld("gitlab", {
     ipcRenderer.invoke("gitlab-login-token", { host, token }),
   logout: () => ipcRenderer.invoke("gitlab-logout"),
   listRepos: () => ipcRenderer.invoke("gitlab-list-repos"),
+  pullProject: (remote) => ipcRenderer.invoke("gitlab-pull-repo", { remote }),
+  pushLocalToRemote: (args) => ipcRenderer.invoke("gitlab-push-repo", args),
+  createRemoteRepo: (args) => ipcRenderer.invoke("gitlab-create-repo", args),
 });

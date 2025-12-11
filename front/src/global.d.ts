@@ -16,12 +16,14 @@ declare global {
       createRemoteRepo: (args: any) => any;
       pushLocalToRemote: (args: any) => any;
     };
-
     gitlab: {
-      getAuthStatus: () => Promise<{ connected: boolean; host?: string | null; login?: string | null; avatarUrl?: string | null }>;
-      loginWithToken: (host: string, token: string) => Promise<{ connected: boolean; host?: string | null; login?: string | null; avatarUrl?: string | null }>;
+      getAuthStatus: () => Promise<any>;
+      loginWithToken: (host: string, token: string) => Promise<any>;
       logout: () => Promise<any>;
-      listRepos: () => Promise<Array<any>>;
+      listRepos: () => Promise<any[]>;
+      pullProject: (remote: string) => Promise<any>;
+      pushLocalToRemote: (args: { localPath: string; remoteUrl: string; branch?: string }) => Promise<any>;
+      createRemoteRepo: (args: { name: string; description?: string; isPrivate?: boolean; namespaceId?: number | null }) => Promise<any>;
     };
   }
 }

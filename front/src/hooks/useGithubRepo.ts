@@ -24,6 +24,7 @@ export function useGithubRepo(allReposRef: () => Repo[]) {
         allReposRef().map((r) => normalizeUrl(r.remote ?? r.path ?? "")).filter(Boolean)
       );
 
+
       const normalized = raw
         .map((r: any) => {
           const clone = normalizeUrl(r.cloneUrl ?? r.clone_url ?? "");
@@ -49,7 +50,6 @@ export function useGithubRepo(allReposRef: () => Repo[]) {
             updatedAt: x.raw.updatedAt ?? x.raw.updated_at,
           },
         }));
-
       setGithubRepos(normalized);
     } catch (err) {
       console.error("Failed to load GitHub repos:", err);
