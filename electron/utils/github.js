@@ -142,7 +142,6 @@ export async function login() {
     deviceInfo.verification_uri_complete || deviceInfo.verification_uri;
   shell.openExternal(urlToOpen);
 
-  console.log("[GitHub] Tape ce code sur GitHub :", deviceInfo.user_code);
 
   const tokenData = await pollForAccessToken(
     deviceInfo.device_code,

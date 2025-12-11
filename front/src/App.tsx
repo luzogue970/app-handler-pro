@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import "./app.css";
 import SearchBar from "./components/search-bar/searchBar";
 import GitHubAuth from "./components/github/github";
@@ -12,7 +12,6 @@ export default function App() {
     localFiltered,
     remoteFiltered,
     gitlabFiltered,
-    refreshGitlab,
     githubStatus,
     deviceInfo,
     handleLogin,

@@ -100,7 +100,6 @@ export default function Repository({ repo, index }: Props) {
     }
   };
 
-  console.log(repo);
 
 
   return (

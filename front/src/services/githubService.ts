@@ -23,7 +23,6 @@ export const createRemoteRepo = async (name: string, description: string, priavt
 }
 
 export const pushLocalToRemote = async (localPath: string, remoteUrl: string, branch: string) => {
-  console.log("push service : " + localPath + " remote : " + remoteUrl + " branch : " + branch)
   return await window.github?.pushLocalToRemote({localPath, remoteUrl, branch});
 }
 

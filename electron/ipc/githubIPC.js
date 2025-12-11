@@ -68,7 +68,6 @@ export default function GithubIPCInit() {
   });
 
   ipcMain.handle("github-create-repo", async (_event, args) => {
-    console.log("ici info create ipc: " + args);
 
     try {
       const res = await createRemoteRepo(args || {});
@@ -80,7 +79,6 @@ export default function GithubIPCInit() {
   });
 
   ipcMain.handle("github-push-repo", async (_event, args) => {
-    console.log("ici info push ipc: " + args);
 
     try {
       const res = await pushLocalToRemote( args || {});

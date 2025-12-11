@@ -92,6 +92,3 @@ npm run package
 ## Contribuer
 - Ouvrir une issue pour une détection manquante ou un problème d'auth.
 - PR bienvenue pour améliorer la détection de projet, ajout d'autres providers (Bitbucket, self‑hosted Git services), ou meilleure gestion des tokens.
-
-## Licence
-Ajoutez ici la licence du projet (ex: MIT) ou laissez
