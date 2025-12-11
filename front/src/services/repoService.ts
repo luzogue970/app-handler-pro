@@ -60,12 +60,10 @@ export async function createRemoteRepoForProvider(provider: Provider | string, n
   const p = (provider as Provider) ?? detectProviderFromUrl("");
   if (p === "gitlab") {
     if (typeof (GitLabService as any).createRemoteRepo === "function") {
-      console.log("before création repo : name : " + name);
-      
+
       return await (GitLabService as any).createRemoteRepo({ name, description, private: isPrivate });
     }
     throw new Error("GitLab createRemoteRepo API not available");
   }
-  // default to GitHub
   return await GitHubService.createRemoteRepo(name, description, isPrivate);
 }

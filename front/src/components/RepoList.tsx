@@ -20,19 +20,6 @@ export default function RepoList({ local, github, gitlab }: Props) {
     local.map((r) => normalizeKey(r.remote ?? r.path ?? r.name)).filter(Boolean)
   );
 
-  //   {
-  //     "id": 69056704,
-  //     "name": "Back",
-  //     "path": "lodger_m1_dev_b_czma/back",
-  //     "description": "",
-  //     "webUrl": "https://gitlab.com/lodger_m1_dev_b_czma/back",
-  //     "sshUrl": "git@gitlab.com:lodger_m1_dev_b_czma/back.git",
-  //     "httpUrl": "https://gitlab.com/lodger_m1_dev_b_czma/back.git",
-  //     "visibility": "private",
-  //     "defaultBranch": "main",
-  //     "lastActivityAt": "2025-09-04T14:21:46.155Z"
-  // }
-
   const filteredGithubRemote = (github || []).filter((r: any) => {
     const candidates = [
       r.remote,

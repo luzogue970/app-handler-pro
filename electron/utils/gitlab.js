@@ -146,10 +146,8 @@ export async function pullProject(remote) {
 
   if (!remote) throw new Error("remote required");
 
-  // build a clone URL if user provided "owner/repo" or web url without .git
   let cloneUrl = String(remote).trim();
 
-  // if remote is a short path like "owner/repo", build from stored host if available
   if (
     !/^((git|ssh|http(s)?)|[^/:]+@)/i.test(cloneUrl) &&
     stored &&
@@ -160,13 +158,11 @@ export async function pullProject(remote) {
     if (!candidate.endsWith(".git")) candidate = candidate + ".git";
     cloneUrl = `${base}/${candidate}`;
   } else {
-    // ensure http web urls end with .git to clone
     if (/^https?:\/\//i.test(cloneUrl) && !/\.git$/.test(cloneUrl)) {
       cloneUrl = cloneUrl.replace(/\/+$/, "") + ".git";
     }
   }
 
-  // inject token for http(s) clones to private GitLab if host matches and token is present
   try {
     if (
       /^https?:\/\//i.test(cloneUrl) &&
@@ -177,18 +173,15 @@ export async function pullProject(remote) {
       const storedHost = stored.host.replace(/\/+$/, "").toLowerCase();
       const urlObj = new URL(cloneUrl);
       if (urlObj.host.toLowerCase().includes(new URL(storedHost).host)) {
-        // use oauth2 as username to avoid revealing a real username; encode token
         urlObj.username = "oauth2";
         urlObj.password = encodeURIComponent(stored.token);
         cloneUrl = urlObj.toString();
       }
     }
   } catch (e) {
-    // ignore URL parsing errors — fallback to provided cloneUrl
     console.warn("[GitLab] pullProject: URL parse/inject failed", e);
   }
 
-  // ask destination directory
   const { canceled, filePaths } = await dialog.showOpenDialog({
     title: "Choisir un dossier de destination pour cloner le dépôt",
     properties: ["openDirectory", "createDirectory"],
@@ -201,12 +194,10 @@ export async function pullProject(remote) {
 
   const parentDir = filePaths[0];
 
-  // compute target folder name from cloneUrl
   const repoNameMatch = cloneUrl.split("/").pop() || "repo";
   const repoFolder = repoNameMatch.replace(/\.git$/, "");
   const targetPath = path.join(parentDir, repoFolder);
 
-  // ensure target does not already exist or is empty
   if (fs.existsSync(targetPath)) {
     return {
       success: false,
@@ -215,7 +206,6 @@ export async function pullProject(remote) {
     };
   }
 
-  // spawn git clone
   return await new Promise((resolve) => {
     const args = ["clone", cloneUrl];
     const child = spawn("git", args, {
@@ -241,12 +231,9 @@ export async function pullProject(remote) {
 
     child.on("close", (code) => {
       if (code === 0) {
-        // open folder in file manager as suggestion
         try {
           shell.showItemInFolder(targetPath);
-        } catch (e) {
-          // ignore
-        }
+        } catch (e) {}
         resolve({ success: true, path: targetPath, stdout, stderr });
       } else {
         resolve({
@@ -305,38 +292,112 @@ export async function pushLocalToRemote(
 ) {
   if (!fs.existsSync(localPath)) throw new Error("local path does not exist");
 
-  if (opts.createIfMissing) {
-    // S'assure qu'il y a un repo git + un commit + une branche
-    await ensureInitialized(localPath, branch);
+  const execGit = (args) =>
+    new Promise((resolve) => {
+      const child = spawn("git", args, {
+        cwd: localPath,
+        env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+      });
+      let stdout = "";
+      let stderr = "";
+      child.stdout.on("data", (d) => (stdout += d.toString()));
+      child.stderr.on("data", (d) => (stderr += d.toString()));
+      child.on("error", (err) =>
+        resolve({ code: -1, stdout, stderr: stderr + String(err) })
+      );
+      child.on("close", (code) => resolve({ code, stdout, stderr }));
+    });
+
+  const ensureInitialized = async () => {
+    const check = await execGit(["rev-parse", "--is-inside-work-tree"]);
+    const inside = check.code === 0 && /true/i.test(check.stdout || "");
+    if (!inside) {
+      await execGit(["init"]);
+      await execGit(["add", "-A"]);
+      const commitRes = await execGit([
+        "-c",
+        "user.name=conf-saver",
+        "-c",
+        "user.email=conf-saver@local",
+        "commit",
+        "-m",
+        "Initial commit",
+      ]);
+      if (commitRes.code !== 0) {
+        await execGit([
+          "-c",
+          "user.name=conf-saver",
+          "-c",
+          "user.email=conf-saver@local",
+          "commit",
+          "--allow-empty",
+          "-m",
+          "Initial commit (empty)",
+        ]);
+      }
+    }
+  };
+
+  try {
+    if (opts.createIfMissing) await ensureInitialized();
+
+    const rev = await execGit(["rev-parse", "--abbrev-ref", "HEAD"]);
+    let currentBranch = (rev.stdout || "").trim();
+    if (!currentBranch || currentBranch === "HEAD") {
+      const c = await execGit(["checkout", "-b", branch]);
+      if (c.code === 0) currentBranch = branch;
+      else {
+        await execGit(["checkout", "-b", "main"]).catch(() => {});
+        currentBranch = "main";
+      }
+    }
+
+    const originCheck = await execGit(["remote", "get-url", "origin"]);
+    if (originCheck.code === 0) {
+      await execGit(["remote", "set-url", "origin", remoteUrl]);
+    } else {
+      const addRes = await execGit(["remote", "add", "origin", remoteUrl]);
+      if (addRes.code !== 0) {
+        return {
+          success: false,
+          error: "git remote add origin failed",
+          stdout: addRes.stdout,
+          stderr: addRes.stderr,
+        };
+      }
+    }
+
+    const pushRes = await execGit([
+      "push",
+      "origin",
+      currentBranch,
+      "--set-upstream",
+    ]);
+    if (pushRes.code !== 0) {
+      return {
+        success: false,
+        error:
+          pushRes.stderr ||
+          pushRes.stdout ||
+          `git push failed (code ${pushRes.code})`,
+        stdout: pushRes.stdout,
+        stderr: pushRes.stderr,
+        attemptedBranch: currentBranch,
+      };
+    }
+
+    return {
+      success: true,
+      localPath,
+      remoteUrl,
+      branch: currentBranch,
+      stdout: pushRes.stdout,
+      stderr: pushRes.stderr,
+    };
+  } catch (err) {
+    return { success: false, error: err?.message ?? String(err) };
   }
-
-  // Optionnel mais propre : récupérer la branche courante si possible
-  let currentBranch = branch;
-  const head = await execGit(localPath, ["rev-parse", "--abbrev-ref", "HEAD"]);
-  if (head.code === 0) {
-    const b = head.stdout.trim();
-    if (b && b !== "HEAD") currentBranch = b;
-  }
-
-  const tmpRemote = `tmp-${Date.now()}`;
-  await execGit(localPath, ["remote", "add", tmpRemote, remoteUrl]);
-
-  const push = await execGit(localPath, [
-    "push",
-    tmpRemote,
-    `${currentBranch}:${branch}`, // local:remote
-    "--set-upstream",
-  ]);
-
-  await execGit(localPath, ["remote", "remove", tmpRemote]);
-
-  if (push.code !== 0) {
-    return { success: false, error: push.stderr || push.stdout };
-  }
-
-  return { success: true, stdout: push.stdout };
 }
-
 
 export async function createRemoteRepo(opts = {}) {
   let name;
@@ -344,10 +405,9 @@ export async function createRemoteRepo(opts = {}) {
   let isPrivate = false;
   console.log(JSON.stringify(opts));
 
-
-    name = opts.name.name ?? "";
-    description = opts.name.description ?? "";
-    isPrivate = opts.name.isPrivate ?? false;
+  name = opts.name.name ?? "";
+  description = opts.name.description ?? "";
+  isPrivate = opts.name.isPrivate ?? false;
 
   const stored = readStoredToken(tokenPath);
   if (!stored || !stored.token || !stored.host) {

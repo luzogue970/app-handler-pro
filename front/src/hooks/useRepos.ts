@@ -39,13 +39,9 @@ export function useRepos() {
 
   useEffect(() => {
     (async () => {
-      console.debug("[useRepos] init sequence start");
-      const locals = await local.loadRepos();           // <-- charger d'abord les repos locaux
-      console.debug("[useRepos] after local.loadRepos - local.allRepos length:", local.allRepos.length, "returned:", Array.isArray(locals) ? locals.length : typeof locals);
+      const locals = await local.loadRepos();
       await github.loadGithubRepos();
-      console.debug("[useRepos] after github.loadGithubRepos - github count:", github.githubRepos?.length ?? 0);
-      await gitlab.initGitlabStatusAndRepos(); // puis GitLab (qui s'appuie sur allReposRef)
-      console.debug("[useRepos] after gitlab.initGitlabStatusAndRepos - gitlab count:", gitlab.gitlabRepos?.length ?? 0);
+      await gitlab.initGitlabStatusAndRepos();
     })();
 
   }, []);

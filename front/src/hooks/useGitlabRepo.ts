@@ -47,7 +47,7 @@ export function useGitlabRepo(allReposRef: () => Repo[]) {
         launchCommand: null,
         launchCommands: [],
         isRemoteOnly: true,
-        // keep gitlabMeta (similar to githubMeta)
+
         gitlabMeta: {
           id: x.raw.id,
           pathWithNamespace:
@@ -81,12 +81,6 @@ export function useGitlabRepo(allReposRef: () => Repo[]) {
 
       const normalized = normalizeArray(raw);
 
-      if (normalized.length > 0) {
-        console.debug("[useGitlabRepo] gitlab normalized example:", JSON.stringify(normalized[0], null, 2));
-      } else {
-        console.debug("[useGitlabRepo] normalized empty");
-      }
-
       setGitlabRepos(normalized);
     } catch (err) {
       console.error("Failed to load GitLab repos:", err);
@@ -94,7 +88,7 @@ export function useGitlabRepo(allReposRef: () => Repo[]) {
     }
   }, [normalizeArray]);
 
-  // refresh should also produce normalized objects
+
   async function refreshGitlab() {
     try {
       await loadGitlabRepos();
@@ -121,7 +115,7 @@ export function useGitlabRepo(allReposRef: () => Repo[]) {
       setGitlabStatusChecked(true);
       if (s && s.connected) {
         setGitlabStatus({ connected: !!s.connected, host: s.host ?? null, login: s.login ?? null, avatarUrl: s.avatarUrl ?? null });
-        // use our loader so we store normalized objects
+
         await loadGitlabRepos();
       } else {
         setGitlabStatus({ connected: false });

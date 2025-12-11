@@ -77,7 +77,6 @@ export default function Repository({ repo, index }: Props) {
 
     setBusy(true);
     try {
-      // create remote on selected provider via RepoService
       const create = await RepoService.createRemoteRepoForProvider(
         newRepoProvider,
         newRepoName.trim(),
@@ -85,13 +84,11 @@ export default function Repository({ repo, index }: Props) {
         newRepoPrivate
       );
 
-      // debug: always log full response for troubleshooting
       console.debug("[Repository] create remote response:", create);
 
-      // helper to pick/build a cloneable remote URL
       const pickRemoteUrl = (resp: any) => {
         if (!resp) return null;
-        // common properties returned by providers / IPC
+
         const candidates = [
           resp?.data?.clone_url,
           resp?.data?.ssh_url_to_repo,
@@ -115,7 +112,6 @@ export default function Repository({ repo, index }: Props) {
           resp?.htmlUrl,
         ].filter(Boolean);
 
-        // prefer ssh or http clone url
         for (const c of candidates) {
           const s = String(c);
           if (
@@ -126,7 +122,6 @@ export default function Repository({ repo, index }: Props) {
             return s;
         }
 
-        // if only web_url present, try to build http clone (.git)
         const web =
           resp?.data?.web_url ??
           resp?.web_url ??
@@ -143,20 +138,14 @@ export default function Repository({ repo, index }: Props) {
         return null;
       };
 
-      console.log("create : " + JSON.stringify(create));
-
-
       const remoteUrl = pickRemoteUrl(create);
 
-      console.log("remoteUrl : " + remoteUrl);
-
-
+      console.log("remote : " + remoteUrl);
 
       if (!remoteUrl) {
-        // show full response to help debugging
-          typeof create === "object"
-            ? JSON.stringify(create, null, 2)
-            : String(create);
+        typeof create === "object"
+          ? JSON.stringify(create, null, 2)
+          : String(create);
         console.error(
           "[Repository] create remote returned no usable url:",
           create
@@ -164,7 +153,7 @@ export default function Repository({ repo, index }: Props) {
         alert(
           "Erreur création remote : URL introuvable. Voir console pour la réponse complète."
         );
-        // optional: open devtools or copy response to clipboard
+
         return;
       }
 
