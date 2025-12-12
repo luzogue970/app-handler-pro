@@ -35,11 +35,9 @@ jobs:
 
       - name: Install front dependencies
         run: |
-          if [ -f front/package.json ]; then
             cd front
             npm ci
             cd ..
-          fi
 
       - name: Lint
         run: npm run lint
