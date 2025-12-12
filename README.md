@@ -30,8 +30,12 @@ cd app-handler-pro
 # à la racine
 npm install
 
-# si le front est séparé (ex: ./front)
+# le front et le back sont séparés est séparé (ex: ./front)
 cd front
+npm install
+cd ..
+
+cd electron
 npm install
 cd ..
 ```
@@ -39,24 +43,7 @@ cd ..
 3. Lancer en mode développement
 - Si le projet expose des scripts (vérifier `package.json` à la racine) :
 ```bash
-# exemple commun
-npm run dev
-# ou
 npm run start
-```
-
-- Si aucun script n'existe, lancer Electron manuellement :
-```bash
-# depuis la racine du projet
-npx electron .
-```
-
-4. (Optionnel) Si le frontend est un projet séparé (React/CRA/Vite), vous pouvez lancer le dev server du front d'abord, puis lancer Electron :
-```bash
-# dans front/
-npm run dev
-# dans la racine du projet (ou autre terminal)
-npx electron .
 ```
 
 ## Configuration / variables d'environnement
@@ -69,17 +56,6 @@ npx electron .
 - Les dépôts GitLab / GitHub s'affichent dans la liste des dépôts distants. Ils sont filtrés par la recherche.
 - Cliquer sur un dépôt local permet d'ouvrir dans VSCode / lancer une commande candidate.
 
-## Notes techniques / dépannage
-- "Aucune commande de lancement détectée" : le scanner fait un enrichissement des projets et, si un projet détecté est un parent sans commandes, il recherche un sous‑dossier (1–2 niveaux) contenant un vrai projet (package.json, go.mod, Cargo.toml, pyproject.toml, pom.xml, composer.json) et proxifie vers celui‑ci.
-- Erreur "push is not defined" : cela signifie probablement qu'un appel frontend utilise une fonction `push(...)` inexistante. Vérifier :
-  - `preload.js` : l'exposition via `contextBridge.exposeInMainWorld("github", { pushLocalRepo: ... })`
-  - `front/src/services/...` : wrapper utilisé (ex: `githubService.pushLocalRepo(...)`)
-  - composants qui appellent l'API (aligner le nom)
-- Si la liste GitLab n'apparaît pas :
-  - Vérifier connexion (popup PAT)
-  - Vérifier console devtools (frontend) pour voir la donnée brute (log dans `RepoList`)
-  - Vérifier que `gitlabService` utilise `window.gitlab` exposé par `preload.js`
-
 ## Tests & packaging
 - Packaging dépend du builder choisi (electron-builder, electron-forge...). Ajouter / utiliser les scripts dans `package.json`.
 - Exemple (electron-builder) :
@@ -88,7 +64,3 @@ npm run build
 npm run package
 ```
 (Vérifier/adapter les scripts dans `package.json`)
-
-## Contribuer
-- Ouvrir une issue pour une détection manquante ou un problème d'auth.
-- PR bienvenue pour améliorer la détection de projet, ajout d'autres providers (Bitbucket, self‑hosted Git services), ou meilleure gestion des tokens.
