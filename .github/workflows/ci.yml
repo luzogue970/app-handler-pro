@@ -46,7 +46,7 @@ jobs:
           fi
 
       - name: Build root
-        run: sudo dnf install -y libxcrypt-compat ruby && npm run build
+        run: npm run build
 
 
       - name: Lint

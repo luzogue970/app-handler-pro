@@ -14,7 +14,7 @@ export function useGitlabRepo(allReposRef: () => Repo[]) {
       allReposRef().map((r) => normalizeUrl(r.remote ?? r.path ?? "")).filter(Boolean)
     );
 
-    const reposs = allReposRef()
+
 
 
     return (rawArray || [])

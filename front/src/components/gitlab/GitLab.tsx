@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import GitLabPopup from "./gitlabpopup/GitLabPopup";
-import { getAuthStatus, listRepos, logout } from "../../services/gitlabService";
+import { getAuthStatus, logout } from "../../services/gitlabService";
 import "./gitlab.css";
 
 type Status = {
@@ -31,7 +31,7 @@ export default function GitLab() {
             login: s.login ?? null,
             avatarUrl: s.avatarUrl ?? null,
           });
-      } catch {}
+      } catch { }
     })();
   }, []);
 
@@ -43,7 +43,7 @@ export default function GitLab() {
   const handleLogout = async () => {
     try {
       await logout();
-    } catch {}
+    } catch { }
     setStatus({ connected: false, host: null, login: null });
     window.dispatchEvent(
       new CustomEvent("repos-updated", {
@@ -75,7 +75,7 @@ export default function GitLab() {
           className="github-login-btn"
           onClick={status.connected ? handleLogout : openLogin}
         >
-          { !status.connected ? "Se connecter à GitLab" : "Se déconnecter de GitLab"}
+          {!status.connected ? "Se connecter à GitLab" : "Se déconnecter de GitLab"}
         </button>
 
         <span id="gitlab-status" className="github-status">

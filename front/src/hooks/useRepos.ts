@@ -39,7 +39,7 @@ export function useRepos() {
 
   useEffect(() => {
     (async () => {
-      const locals = await local.loadRepos();
+      await local.loadRepos();
       await github.loadGithubRepos();
       await gitlab.initGitlabStatusAndRepos();
     })();
