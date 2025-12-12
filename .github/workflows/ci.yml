@@ -33,6 +33,14 @@ jobs:
       - name: Install root dependencies
         run: npm ci
 
+      - name: Install front dependencies
+        run: |
+          if [ -f front/package.json ]; then
+            cd front
+            npm ci
+            cd ..
+          fi
+
       - name: Lint
         run: npm run lint
 
@@ -128,13 +136,16 @@ jobs:
             cd ..
           fi
 
-      - name: Build
-        run: npm run build
+      - name: Build front
+        run: npm run build:front
+
+      - name: Build electron
+        run: npm run build:electron -- --publish never
 
       - name: Upload build artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path:
+          path: dist
 
