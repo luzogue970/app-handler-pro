@@ -34,32 +34,26 @@ jobs:
       - name: Install root dependencies
         run: npm ci
 
-      - name: Install & build front (if present)
+      - name: Install front dependencies
         run: |
           if [ -f front/package.json ]; then
             cd front
             npm ci
-            npm run build || echo "front build script failed or missing; continue"
             cd ..
-          else
-            echo "no front/ package.json, skipping front build"
           fi
-
-      - name: Build root
-        run: npm run build
-
 
       - name: Lint
         run: npm run lint
 
-      - name: test
+      - name: Build front
+        run: |
+          if [ -f front/package.json ]; then
+            npm run build:front
+          fi
+
+      - name: Build electron
+        run: npm run build:electron -- --publish never
+
+      - name: Test
         run: npm test
-      - name: Upload front artifact (if exists)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: front-dist
-          path: |
-            front/dist
-            front/build
-            dist
+
