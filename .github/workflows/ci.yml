@@ -7,7 +7,36 @@ on:
     branches: ["main", "master"]
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["18.x"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-lint-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,7 +58,8 @@ jobs:
             ~/.npm
             node_modules
             front/node_modules
-          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+            electron/node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-test-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install root dependencies
         run: npm ci
@@ -42,18 +72,69 @@ jobs:
             cd ..
           fi
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Build front
+      - name: Install back dependencies
         run: |
-          if [ -f front/package.json ]; then
-            npm run build:front
+          if [ -f electron/package.json ]; then
+            cd electron
+            npm ci
+            cd ..
           fi
-
-      - name: Build electron
-        run: npm run build:electron -- --publish never
 
       - name: Test
         run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["18.x"]
+    needs: [lint, test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            front/node_modules
+            electron/node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-build-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install front dependencies
+        run: |
+          if [ -f front/package.json ]; then
+            cd front
+            npm ci
+            cd ..
+          fi
+
+      - name: Install back dependencies
+        run: |
+          if [ -f electron/package.json ]; then
+            cd electron
+            npm ci
+            cd ..
+          fi
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path:
 
