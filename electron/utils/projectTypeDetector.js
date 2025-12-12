@@ -80,10 +80,10 @@ function findAncestorWithMarker(repoPath, maxLevels = 3) {
           )
             return parent;
         }
-      } catch {}
+      } catch { /* empty */ }
       cur = parent;
     }
-  } catch {}
+  } catch { /* empty */ }
   return null;
 }
 
@@ -110,7 +110,7 @@ function detectPackageManager(repoPath, pkg = {}) {
       if (pkg.packageManager.startsWith("yarn")) return "yarn";
       if (pkg.packageManager.startsWith("bun")) return "bun";
     }
-  } catch {}
+  } catch { /* empty */ }
 
   if (fileExists(repoPath, "pnpm-lock.yaml")) return "pnpm";
   if (fileExists(repoPath, "yarn.lock")) return "yarn";
@@ -149,10 +149,10 @@ function hasCodeFilesIn(dir) {
           const c = fs.readdirSync(path.join(dir, it.name));
           if (c.some((f) => CODE_EXTS.includes(path.extname(f).toLowerCase())))
             return true;
-        } catch {}
+        } catch { /* empty */ }
       }
     }
-  } catch {}
+  } catch { /* empty */ }
   return false;
 }
 
@@ -177,12 +177,7 @@ export function detectProjectType(repoPath) {
     const scripts = pkg.scripts || {};
     const pm = detectPackageManager(repoPath, pkg);
 
-    const run = (s) =>
-      s === "start"
-        ? pm === "npm"
-          ? "npm start"
-          : `${pm} start`
-        : pmRun(pm, s);
+
 
     const candidates = [];
     let type = "node";
@@ -399,7 +394,7 @@ export function detectProjectType(repoPath) {
           ].slice(0, 5),
         };
       }
-    } catch {}
+    } catch { /* empty */ }
     const gradleCmd = hasGradlew ? "./gradlew" : "gradle";
     return {
       type: "java",
@@ -443,7 +438,7 @@ export function detectProjectType(repoPath) {
         ].slice(0, 5),
       };
     }
-  } catch {}
+  } catch { /* empty */ }
 
   if (fileExists(repoPath, "composer.json")) {
     return {
@@ -486,8 +481,8 @@ export function detectProjectType(repoPath) {
       process.platform === "win32"
         ? `cmd /c start "" "${preferred}"`
         : process.platform === "darwin"
-        ? `open "${preferred}"`
-        : `xdg-open "${preferred}"`;
+          ? `open "${preferred}"`
+          : `xdg-open "${preferred}"`;
     return {
       type: "static-html",
       launchCommands: [

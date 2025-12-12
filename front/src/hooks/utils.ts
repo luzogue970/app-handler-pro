@@ -10,7 +10,7 @@ export function stringifyValues(obj: any, seen = new Set()): string {
   }
   if (typeof obj !== "object") return "";
   seen.add(obj);
-  let parts: string[] = [];
+  const parts: string[] = [];
   if (Array.isArray(obj)) {
     for (const v of obj) parts.push(stringifyValues(v, seen));
   } else {

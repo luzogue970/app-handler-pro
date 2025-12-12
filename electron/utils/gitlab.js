@@ -233,7 +233,7 @@ export async function pullProject(remote) {
       if (code === 0) {
         try {
           shell.showItemInFolder(targetPath);
-        } catch (e) {}
+        } catch { /* empty */ }
         resolve({ success: true, path: targetPath, stdout, stderr });
       } else {
         resolve({
@@ -248,41 +248,9 @@ export async function pullProject(remote) {
   });
 }
 
-const execGit = (cwd, args) =>
-  new Promise((resolve) => {
-    const child = spawn("git", args, {
-      cwd,
-      env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
-    });
-    let stdout = "",
-      stderr = "";
-    child.stdout.on("data", (d) => (stdout += d.toString()));
-    child.stderr.on("data", (d) => (stderr += d.toString()));
-    child.on("close", (code) => resolve({ code, stdout, stderr }));
-    child.on("error", (err) =>
-      resolve({ code: -1, stdout, stderr: String(err) })
-    );
-  });
 
-async function ensureInitialized(localPath) {
-  const check = await execGit(localPath, [
-    "rev-parse",
-    "--is-inside-work-tree",
-  ]);
-  if (check.code === 0 && /true/i.test(check.stdout || "")) return;
-  await execGit(localPath, ["init"]);
-  await execGit(localPath, ["add", "-A"]);
-  await execGit(localPath, [
-    "-c",
-    "user.name=conf-saver",
-    "-c",
-    "user.email=conf-saver@local",
-    "commit",
-    "--allow-empty",
-    "-m",
-    "Initial commit",
-  ]);
-}
+
+
 
 export async function pushLocalToRemote(
   localPath,
@@ -347,7 +315,7 @@ export async function pushLocalToRemote(
       const c = await execGit(["checkout", "-b", branch]);
       if (c.code === 0) currentBranch = branch;
       else {
-        await execGit(["checkout", "-b", "main"]).catch(() => {});
+        await execGit(["checkout", "-b", "main"]).catch(() => { });
         currentBranch = "main";
       }
     }

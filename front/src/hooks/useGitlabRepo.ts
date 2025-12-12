@@ -16,8 +16,6 @@ export function useGitlabRepo(allReposRef: () => Repo[]) {
 
     const reposs = allReposRef()
 
-    console.log("locals : " + JSON.stringify(reposs));
-
 
     return (rawArray || [])
       .map((r: any) => {

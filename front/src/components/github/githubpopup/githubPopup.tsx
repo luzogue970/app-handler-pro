@@ -79,7 +79,7 @@ export default function GitHubPopup({
   return (
     <div className="gh-popup-backdrop">
       <div className="gh-popup">
-        <h3>Connexion GitHub (device flow)</h3>
+        <h3>Connexion GitHub</h3>
         <p>
           Ouvre{" "}
           <strong>

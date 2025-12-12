@@ -1,4 +1,4 @@
-import fs from "fs/promises";
+
 import fsSync from "fs";
 import path from "path";
 import { scanForProjects } from "./ProjectScanner.js";
@@ -82,7 +82,7 @@ export async function detectProjectsAndCommands(rootPath, options = {}) {
     let det;
     try {
       det = detectProjectType(p.path);
-    } catch (e) {
+    } catch {
       det = { type: "unknown", launchCommands: [] };
     }
 
@@ -104,7 +104,7 @@ export async function detectProjectsAndCommands(rootPath, options = {}) {
             });
             continue;
           }
-        } catch {}
+        } catch { /* empty */ }
       }
     }
 

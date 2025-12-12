@@ -10,7 +10,9 @@
     "build:electron": "electron-builder",
     "build:win": "electron-builder --linux",
     "ci": "npm ci && npm ci --prefix front && npm --prefix front run build",
-    "lint": "eslint \"**/*.{ts,tsx,js,jsx}\" --max-warnings=0",
+    "lint": "npm run lint:electron && npm run lint:front",
+    "lint:front": "npm run lint --prefix front",
+    "lint:electron": "eslint . --max-warnings=0",
     "test": "vitest",
     "typecheck": "tsc -p . --noEmit"
   },
@@ -21,9 +23,12 @@
   },
   "type": "commonjs",
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "concurrently": "^9.2.1",
     "electron": "^39.2.6",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0"
   },
   "build": {
     "appId": "com.yourcompany.apphandlerpro",

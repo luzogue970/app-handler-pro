@@ -365,10 +365,10 @@ export async function createRemoteRepo(opts = {}) {
       res.status === 404
         ? "Not Found — vérifie l'URL/organisation et que le token est valide."
         : res.status === 401
-        ? "Unauthorized — token invalide."
-        : res.status === 403
-        ? "Forbidden — token sans scope. Reconnecte-toi en demandant le scope 'public_repo' ou 'repo'."
-        : null;
+          ? "Unauthorized — token invalide."
+          : res.status === 403
+            ? "Forbidden — token sans scope. Reconnecte-toi en demandant le scope 'public_repo' ou 'repo'."
+            : null;
     throw new Error(
       `GitHub API error: ${apiMsg}${advise ? " — " + advise : ""}`
     );
@@ -407,7 +407,7 @@ export async function pushLocalToRemote(opts = {}) {
     let status;
     try {
       status = await runGit(["status", "--porcelain"], { cwd: repoPath });
-    } catch (e) {
+    } catch {
       status = { stdout: "" };
     }
     if ((status.stdout || "").trim()) {
@@ -421,7 +421,7 @@ export async function pushLocalToRemote(opts = {}) {
 
     try {
       await runGit(["remote", "add", "origin", remoteUrl], { cwd: repoPath });
-    } catch (e) {
+    } catch {
       await runGit(["remote", "set-url", "origin", remoteUrl], {
         cwd: repoPath,
       });
